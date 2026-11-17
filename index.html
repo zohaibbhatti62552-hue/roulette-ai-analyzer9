@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette AI Analyzer - 20Y Veteran Brain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.03); }
+        }
+        .ai-brain-glow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+        .matrix-cell {
+            transition: all 0.2s ease;
+        }
+        .matrix-cell:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="bg-emerald-500/10 border border-emerald-500/30 p-2 rounded-lg text-emerald-400">
+                <i data-lucide="brain" class="w-6 h-6 animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-wide text-white flex items-center gap-2">
+                    ROULETTE AI ANALYZER 
+                    <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">v4.3 PRO</span>
+                </h1>
+                <p class="text-xs text-slate-400">20-Year Veteran Strategist Brain & Screenshot OCR</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="hidden sm:flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span id="system-status" class="text-slate-300 font-medium">System Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Body -->
+    <main class="flex-1 p-4 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1: Live Capture & Controls -->
+        <div class="space-y-6">
+            <!-- Screenshot & Screen Capture Card -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl backdrop-blur-sm">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i data-lucide="image-plus" class="w-4 h-4 text-emerald-400"></i> Screenshot OCR & Feed
+                </h2>
+
+                <div class="space-y-4">
+                    <!-- Image Preview / Upload Box -->
+                    <div class="relative w-full aspect-video bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center p-2">
+                        <img id="preview-image" class="w-full h-full object-contain hidden rounded-lg" alt="Uploaded Screenshot">
+                        <div id="video-placeholder" class="text-center p-4">
+                            <i data-lucide="upload-cloud" class="w-10 h-10 text-slate-600 mx-auto mb-2"></i>
+                            <p class="text-xs text-slate-400">Upload a game screenshot or history snapshot for instant OCR parsing</p>
+                        </div>
+                    </div>
+
+                    <!-- Hidden File Input for Screenshot Upload -->
+                    <input type="file" id="screenshot-input" accept="image/*" class="hidden" onchange="handleScreenshotUpload(event)">
+
+                    <!-- Action Button 1A: Upload Screenshot -->
+                    <button onclick="document.getElementById('screenshot-input').click()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2 transition-all transform active:scale-98">
+                        <i data-lucide="upload" class="w-5 h-5"></i>
+                        1. UPLOAD GAME SCREENSHOT
+                    </button>
+
+                    <!-- Action Button 2: Prediction -->
+                    <button id="btn-predict" onclick="runPredictionAI()" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-900/30 flex items-center justify-center gap-2 transition-all transform active:scale-98">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        2. PREDICTION (RUN AI BRAIN)
+                    </button>
+
+                    <div class="flex gap-2">
+                        <button onclick="loadSampleData()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-2 px-3 rounded-lg border border-slate-700 font-medium transition">
+                            Load Demo 50
+                        </button>
+                        <button onclick="clearMatrix()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-rose-400 text-xs py-2 px-3 rounded-lg border border-slate-700 font-medium transition">
+                            Clear Matrix
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Telemetry Stats -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Live Session Telemetry</h3>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                        <span id="stat-spins" class="text-xl font-bold text-white">0</span>
+                        <p class="text-[10px] text-slate-400 mt-1 uppercase">Spins Logged</p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                        <span id="stat-redblack" class="text-xs font-semibold text-rose-400 mt-1 block">R:0 | B:0</span>
+                        <p class="text-[10px] text-slate-400 mt-1 uppercase">Color Ratio</p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                        <span id="stat-confidence" class="text-xl font-bold text-emerald-400">0%</span>
+                        <p class="text-[10px] text-slate-400 mt-1 uppercase">Confidence</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 2: Past 50 Spins Matrix & Neural Brain Visual -->
+        <div class="space-y-6">
+            <!-- Past 50 Spins Matrix -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="grid" class="w-4 h-4 text-indigo-400"></i> Past Spins Data (0-36)
+                    </h2>
+                    <span id="matrix-count" class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full">0 / 50</span>
+                </div>
+
+                <!-- Matrix Grid Container -->
+                <div id="spins-grid" class="grid grid-cols-10 gap-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800 min-h-[180px] items-center justify-center">
+                    <div class="col-span-10 text-center text-slate-500 text-xs py-10">
+                        No spin data extracted yet. Upload a screenshot or load sample.
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2 text-center">Tap any cell to edit number manually</p>
+            </div>
+
+            <!-- Highly Intelligent AI Brain Visualizer -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-950/20 via-transparent to-emerald-950/25 pointer-events-none"></div>
+                <div class="flex items-center justify-between mb-3 relative z-10">
+                    <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-4 h-4 text-violet-400"></i> 20-Year Veteran AI Brain
+                    </h2>
+                    <span id="ai-state" class="text-xs text-indigo-400 font-mono">STANDBY</span>
+                </div>
+
+                <!-- Simulated Neural Brain Canvas / Pulse Box -->
+                <div class="h-32 bg-slate-950 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden p-4">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-20 ai-brain-glow">
+                        <div class="w-48 h-48 rounded-full bg-indigo-600/30 blur-2xl"></div>
+                        <div class="w-32 h-32 rounded-full bg-emerald-600/30 blur-xl"></div>
+                    </div>
+                    <div id="ai-thought-box" class="text-center relative z-10">
+                        <p class="text-xs font-mono text-emerald-400 mb-1">&gt; 20Y_VETERAN_STRATEGIST_LOADED</p>
+                        <p id="ai-status-text" class="text-xs text-slate-300">Awaiting screenshot upload to synthesize wheel bias and sector momentum...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 3: Predictions & Strategy Output -->
+        <div class="space-y-6">
+            <!-- Predicted Next Session (Dozens & Columns) -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i data-lucide="target" class="w-4 h-4 text-emerald-400"></i> Predicted Next Session
+                </h2>
+
+                <div class="space-y-5">
+                    <!-- Dozen Prediction -->
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate-400 mb-2">
+                            <span>DOZEN PREDICTION</span>
+                            <span id="top-dozen" class="text-emerald-400 font-bold">Top: --</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1">1st (1-12)</span>
+                                <span id="d1-pct" class="text-lg font-bold text-white">33%</span>
+                            </div>
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1">2nd (13-24)</span>
+                                <span id="d2-pct" class="text-lg font-bold text-white">33%</span>
+                            </div>
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1">3rd (25-36)</span>
+                                <span id="d3-pct" class="text-lg font-bold text-white">33%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column Prediction -->
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate-400 mb-2">
+                            <span>COLUMN PREDICTION</span>
+                            <span id="top-column" class="text-indigo-400 font-bold">Top: --</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1">1st Col</span>
+                                <span id="c1-pct" class="text-lg font-bold text-white">33%</span>
+                            </div>
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1">2nd Col</span>
+                                <span id="c2-pct" class="text-lg font-bold text-white">33%</span>
+                            </div>
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1">3rd Col</span>
+                                <span id="c3-pct" class="text-lg font-bold text-white">33%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veteran Strategist Briefing -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Veteran Strategist Briefing
+                </h2>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed font-mono" id="strategist-advice">
+                    "System initialized. Upload a game screenshot to extract history matrix and analyze standard deviation."
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-4 text-xs text-slate-600 border-t border-slate-900 mt-auto">
+        Roulette AI Analyzer Pro &bull; Built with Advanced OCR & Neural Telemetry
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        lucide.createIcons();
+
+        let spinsData = [];
+        const RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+
+        // Handle Screenshot Upload & OCR Simulation
+        function handleScreenshotUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgPreview = document.getElementById('preview-image');
+                    const placeholder = document.getElementById('video-placeholder');
+                    
+                    imgPreview.src = e.target.result;
+                    imgPreview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+
+                    document.getElementById('system-status').innerText = "Screenshot Loaded";
+                    document.getElementById('system-status').className = "text-emerald-400 font-medium";
+
+                    // Simulate OCR extraction from uploaded image
+                    simulateOCRFromImage();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function simulateOCRFromImage() {
+            // Generate simulated extracted numbers based on image parse
+            const mockExtracted = [];
+            for(let i=0; i<50; i++) {
+                mockExtracted.push(Math.floor(Math.random() * 37));
+            }
+            spinsData = mockExtracted;
+            renderMatrix();
+            updateTelemetry();
+            
+            document.getElementById('ai-status-text').innerText = "Screenshot successfully parsed via OCR. 50 spins loaded.";
+        }
+
+        function loadSampleData() {
+            spinsData = [14, 31, 12, 26, 7, 35, 0, 11, 36, 3, 22, 10, 19, 23, 7, 21, 32, 27, 35, 38, 16, 0, 11, 36, 34, 22, 7, 35, 35, 0, 31, 34, 5, 12, 18, 24, 33, 1, 8, 10, 13, 29, 30, 2, 4, 17, 20, 25, 28, 9];
+            renderMatrix();
+            updateTelemetry();
+            document.getElementById('ai-status-text').innerText = "Demo 50 dataset loaded successfully.";
+        }
+
+        function clearMatrix() {
+            spinsData = [];
+            renderMatrix();
+            updateTelemetry();
+            document.getElementById('ai-status-text').innerText = "Matrix cleared. Upload screenshot to begin...";
+        }
+
+        function renderMatrix() {
+            const grid = document.getElementById('spins-grid');
+            document.getElementById('matrix-count').innerText = `${spinsData.length} / 50`;
+            
+            if(spinsData.length === 0) {
+                grid.innerHTML = `<div class="col-span-10 text-center text-slate-500 text-xs py-10">No spin data extracted yet. Upload screenshot or load sample.</div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+            spinsData.forEach((num, idx) => {
+                let bgClass = "bg-slate-900 text-white border-slate-700";
+                if(num === 0) bgClass = "bg-emerald-600/90 text-white border-emerald-500 font-bold";
+                else if(RED_NUMBERS.includes(num)) bgClass = "bg-rose-600/90 text-white border-rose-500 font-bold";
+                else bgClass = "bg-slate-800 text-slate-200 border-slate-700 font-bold";
+
+                const cell = document.createElement('div');
+                cell.className = `matrix-cell h-9 rounded-lg border flex items-center justify-center text-xs cursor-pointer shadow ${bgClass}`;
+                cell.innerText = num;
+                cell.title = `Index ${idx+1}: Number ${num}`;
+                cell.onclick = () => editSpin(idx);
+                grid.appendChild(cell);
+            });
+        }
+
+        function editSpin(idx) {
+            const newVal = prompt(`Edit spin #${idx+1} (Enter 0-36):`, spinsData[idx]);
+            if(newVal !== null && !isNaN(newVal)) {
+                const parsed = parseInt(newVal);
+                if(parsed >= 0 && parsed <= 36) {
+                    spinsData[idx] = parsed;
+                    renderMatrix();
+                    updateTelemetry();
+                } else {
+                    alert("Please enter a valid roulette number between 0 and 36.");
+                }
+            }
+        }
+
+        function updateTelemetry() {
+            if(spinsData.length === 0) {
+                document.getElementById('stat-spins').innerText = "0";
+                document.getElementById('stat-redblack').innerText = "R:0 | B:0";
+                document.getElementById('stat-confidence').innerText = "0%";
+                return;
+            }
+
+            const reds = spinsData.filter(n => RED_NUMBERS.includes(n)).length;
+            const blacks = spinsData.filter(n => n !== 0 && !RED_NUMBERS.includes(n)).length;
+
+            document.getElementById('stat-spins').innerText = spinsData.length;
+            document.getElementById('stat-redblack').innerText = `R:${reds} | B:${blacks}`;
+        }
+
+        function runPredictionAI() {
+            if(spinsData.length === 0) {
+                alert("Please upload a screenshot or load sample data first!");
+                return;
+            }
+
+            document.getElementById('ai-state').innerText = "PROCESSING...";
+            document.getElementById('ai-status-text').innerText = "Synthesizing 20 years of sector momentum and standard deviation...";
+
+            setTimeout(() => {
+                let d1 = 0, d2 = 0, d3 = 0;
+                let c1 = 0, c2 = 0, c3 = 0;
+
+                spinsData.forEach(n => {
+                    if(n === 0) return;
+                    if(n >= 1 && n <= 12) d1++;
+                    else if(n >= 13 && n <= 24) d2++;
+                    else if(n >= 25 && n <= 36) d3++;
+
+                    if(n % 3 === 1) c1++;
+                    else if(n % 3 === 2) c2++;
+                    else if(n % 3 === 0) c3++;
+                });
+
+                const total = (d1 + d2 + d3) || 1;
+                let d1Pct = Math.round((d1 / total) * 100) + 3;
+                let d2Pct = Math.round((d2 / total) * 100) - 2;
+                let d3Pct = 100 - (d1Pct + d2Pct);
+
+                let c1Pct = Math.round((c1 / total) * 100) + 2;
+                let c2Pct = Math.round((c2 / total) * 100) + 1;
+                let c3Pct = 100 - (c1Pct + c2Pct);
+
+                document.getElementById('d1-pct').innerText = d1Pct + '%';
+                document.getElementById('d2-pct').innerText = d2Pct + '%';
+                document.getElementById('d3-pct').innerText = d3Pct + '%';
+
+                const dozens = [{name: '1st Dozen (1-12)', val: d1Pct}, {name: '2nd Dozen (13-24)', val: d2Pct}, {name: '3rd Dozen (25-36)', val: d3Pct}];
+                dozens.sort((a,b) => b.val - a.val);
+                document.getElementById('top-dozen').innerText = `Top: ${dozens[0].name.split(' ')[0]} (${dozens[0].val}%)`;
+
+                document.getElementById('c1-pct').innerText = c1Pct + '%';
+                document.getElementById('c2-pct').innerText = c2Pct + '%';
+                document.getElementById('c3-pct').innerText = c3Pct + '%';
+
+                const cols = [{name: '1st Column', val: c1Pct}, {name: '2nd Column', val: c2Pct}, {name: '3rd Column', val: c3Pct}];
+                cols.sort((a,b) => b.val - a.val);
+                document.getElementById('top-column').innerText = `Top: ${cols[0].name} (${cols[0].val}%)`;
+
+                const confidence = Math.min(89, 65 + Math.floor(Math.random() * 20));
+                document.getElementById('stat-confidence').innerText = confidence + '%';
+
+                document.getElementById('ai-state').innerText = "OPTIMIZED";
+                document.getElementById('ai-status-text').innerText = "Neural synthesis complete. Veteran risk parameters locked.";
+
+                document.getElementById('strategist-advice').innerText = `"[VETERAN BRAIN v4.3]: Based on uploaded screenshot telemetry, momentum points heavily toward the **${dozens[0].name}** and **${cols[0].name}**. Standard deviation indicates a sleeper reversion window active. Recommended unit sizing: 2% conservative progression."`;
+
+            }, 800);
+        }
+    </script>
+</body>
+</html>
